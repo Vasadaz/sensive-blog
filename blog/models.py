@@ -1,9 +1,41 @@
 from django.db import models
+from django.db.models import Count
 from django.urls import reverse
 from django.contrib.auth.models import User
 
 
+class PostQuerySet(models.QuerySet):
+    def popular(self):
+        return self.annotate(
+            likes_count=Count('likes'),
+        ).order_by(
+            '-likes_count',
+        ).prefetch_related(
+            'author',
+        )
+
+
+    def fresh(self):
+        return self.order_by(
+            '-published_at',
+        ).prefetch_related(
+            'author',
+        )
+
+
+    def fetch_with_comments_count(self):
+        posts_ids = [post.id for post in self]
+        posts_with_comments = Post.objects.filter(id__in=posts_ids).annotate(comments_count=Count('comments'))
+        ids_and_comments = posts_with_comments.values_list('id', 'comments_count')
+        count_for_id = dict(ids_and_comments)
+        for post in self:
+            post.comments_count = count_for_id[post.id]
+        return self
+
+
+
 class Post(models.Model):
+    objects = PostQuerySet.as_manager()
     title = models.CharField('Заголовок', max_length=200)
     text = models.TextField('Текст')
     slug = models.SlugField('Название в виде url', max_length=200)
@@ -37,7 +69,16 @@ class Post(models.Model):
         verbose_name_plural = 'посты'
 
 
+class TagQuerySet(models.QuerySet):
+    def popular(self):
+        return self.annotate(
+            posts_count=Count('posts'),
+        ).order_by(
+            '-posts_count',
+        )
+
 class Tag(models.Model):
+    objects = TagQuerySet.as_manager()
     title = models.CharField('Тег', max_length=20, unique=True)
 
     def __str__(self):
