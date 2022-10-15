@@ -138,6 +138,4 @@ dmypy.json
 cython_debug/
 
 # @Vasadaz ignore
-media/
-static/
 .idea/
