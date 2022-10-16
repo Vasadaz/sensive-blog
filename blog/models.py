@@ -79,6 +79,15 @@ class TagQuerySet(models.QuerySet):
             '-posts_count',
         )
 
+    def fetch_with_posts_count(self):
+        tags_ids = [tag.id for tag in self]
+        tags_with_posts = Tag.objects.filter(id__in=tags_ids).annotate(posts_count=Count('posts'))
+        ids_and_posts = tags_with_posts.values_list('id', 'posts_count')
+        count_for_id = dict(ids_and_posts)
+        for tag in self:
+            tag.posts_count = count_for_id[tag.id]
+        return self
+
 class Tag(models.Model):
     objects = TagQuerySet.as_manager()
     title = models.CharField('Тег', max_length=20, unique=True)
