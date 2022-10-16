@@ -12,7 +12,7 @@ class PostQuerySet(models.QuerySet):
             '-likes_count',
         ).prefetch_related(
             'author',
-            'tags',
+            Prefetch('tags', queryset=Tag.objects.all().fetch_with_posts_count()),
         )
 
     def fresh(self):
