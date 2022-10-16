@@ -41,7 +41,7 @@ def index(request):
 
 def post_detail(request, slug):
     post = Post.objects.get(slug=slug)
-    comments = Comment.objects.filter(post=post)
+    comments = post.comments.all()
     serialized_comments = []
     for comment in comments:
         serialized_comments.append({
@@ -50,7 +50,7 @@ def post_detail(request, slug):
             'author': comment.author.username,
         })
 
-    likes = post.likes.all()
+    likes = post.likes.count()
     related_tags = post.tags.all().fetch_with_posts_count()
 
     serialized_post = {
@@ -58,7 +58,7 @@ def post_detail(request, slug):
         'text': post.text,
         'author': post.author.username,
         'comments': serialized_comments,
-        'likes_amount': len(likes),
+        'likes_amount': likes,
         'image_url': post.image.url if post.image else None,
         'published_at': post.published_at,
         'slug': post.slug,
@@ -98,6 +98,4 @@ def tag_filter(request, tag_title):
 
 
 def contacts(request):
-    # позже здесь будет код для статистики заходов на эту страницу
-    # и для записи фидбека
     return render(request, 'contacts.html', {})
