@@ -12,6 +12,7 @@ class PostQuerySet(models.QuerySet):
             '-likes_count',
         ).prefetch_related(
             'author',
+            'tags',
         )
 
 
@@ -20,6 +21,7 @@ class PostQuerySet(models.QuerySet):
             '-published_at',
         ).prefetch_related(
             'author',
+            'tags',
         )
 
 
