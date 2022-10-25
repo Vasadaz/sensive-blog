@@ -12,7 +12,7 @@ class PostQuerySet(models.QuerySet):
             '-likes_count',
         ).prefetch_related(
             'author',
-            Prefetch('tags', queryset=Tag.objects.all().fetch_with_posts_count()),
+            Prefetch('tags', queryset=Tag.objects.annotate(posts_count=Count('posts')), to_attr='tags_posts'),
         )
 
     def fresh(self):
@@ -20,7 +20,7 @@ class PostQuerySet(models.QuerySet):
             '-published_at',
         ).prefetch_related(
             'author',
-            'tags',
+             Prefetch('tags', queryset=Tag.objects.annotate(posts_count=Count('posts')), to_attr='tags_posts'),
         )
 
     def fetch_with_comments_count(self):
