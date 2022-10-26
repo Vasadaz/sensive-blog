@@ -20,7 +20,7 @@ class PostQuerySet(models.QuerySet):
             '-published_at',
         ).prefetch_related(
             'author',
-             Prefetch('tags', queryset=Tag.objects.annotate(posts_count=Count('posts')), to_attr='tags_posts'),
+            Prefetch('tags', queryset=Tag.objects.annotate(posts_count=Count('posts')), to_attr='tags_posts'),
         )
 
     def fetch_with_comments_count(self):
