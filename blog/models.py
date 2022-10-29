@@ -5,6 +5,17 @@ from django.contrib.auth.models import User
 
 
 class PostQuerySet(models.QuerySet):
+    def do_prefetch_related(self):
+        tags_prefetch_related = Prefetch(
+            'tags',
+            queryset=Tag.objects.annotate(posts_count=Count('posts')),
+            to_attr='tags_posts')
+
+        return self.prefetch_related(
+            'author',
+            tags_prefetch_related,
+        )
+
     def fetch_with_comments_count(self):
         posts_ids = [post.id for post in self]
         posts_with_comments = Post.objects.filter(id__in=posts_ids).annotate(comments_count=Count('comments'))
@@ -17,9 +28,6 @@ class PostQuerySet(models.QuerySet):
     def fresh(self):
         return self.order_by(
             '-published_at',
-        ).prefetch_related(
-            'author',
-            Prefetch('tags', queryset=Tag.objects.annotate(posts_count=Count('posts')), to_attr='tags_posts'),
         )
 
     def popular(self):
@@ -27,9 +35,6 @@ class PostQuerySet(models.QuerySet):
             likes_count=Count('likes'),
         ).order_by(
             '-likes_count',
-        ).prefetch_related(
-            'author',
-            Prefetch('tags', queryset=Tag.objects.annotate(posts_count=Count('posts')), to_attr='tags_posts'),
         )
 
 
