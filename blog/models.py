@@ -5,7 +5,7 @@ from django.contrib.auth.models import User
 
 
 class PostQuerySet(models.QuerySet):
-    def do_prefetch_related(self):
+    def make_prefetch(self):
         tags_prefetch_related = Prefetch(
             'tags',
             queryset=Tag.objects.annotate(posts_count=Count('posts')),
