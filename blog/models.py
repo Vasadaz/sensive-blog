@@ -6,14 +6,14 @@ from django.contrib.auth.models import User
 
 class PostQuerySet(models.QuerySet):
     def make_prefetch_authors_and_tags(self):
-        tags_prefetch_related = Prefetch(
+        tags_prefetch = Prefetch(
             'tags',
             queryset=Tag.objects.annotate(posts_count=Count('posts')),
             to_attr='tags_posts')
 
         return self.prefetch_related(
             'author',
-            tags_prefetch_related,
+            tags_prefetch,
         )
 
     def fetch_with_comments_count(self):
