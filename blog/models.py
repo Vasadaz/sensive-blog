@@ -5,17 +5,6 @@ from django.contrib.auth.models import User
 
 
 class PostQuerySet(models.QuerySet):
-    def make_prefetch_authors_and_tags(self):
-        tags_prefetch = Prefetch(
-            'tags',
-            queryset=Tag.objects.annotate(posts_count=Count('posts')),
-            to_attr='tags_posts')
-
-        return self.prefetch_related(
-            'author',
-            tags_prefetch,
-        )
-
     def fetch_with_comments_count(self):
         posts_ids = [post.id for post in self]
         posts_with_comments = Post.objects.filter(id__in=posts_ids).annotate(comments_count=Count('comments'))
@@ -35,6 +24,21 @@ class PostQuerySet(models.QuerySet):
             likes_count=Count('likes'),
         ).order_by(
             '-likes_count',
+        )
+
+    def prefetch_authors(self):
+        return self.prefetch_related(
+            'author',
+        )
+
+    def prefetch_tags(self):
+        tags_prefetch = Prefetch(
+            'tags',
+            queryset=Tag.objects.annotate(posts_count=Count('posts')),
+            to_attr='tags_posts')
+
+        return self.prefetch_related(
+            tags_prefetch,
         )
 
 
