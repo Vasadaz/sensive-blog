@@ -31,7 +31,7 @@ class PostQuerySet(models.QuerySet):
             'author',
         )
 
-    def prefetch_tags(self):
+    def prefetch_tags_and_count_posts(self):
         tags_prefetch = Prefetch(
             'tags',
             queryset=Tag.objects.annotate(posts_count=Count('posts')),
